@@ -30,6 +30,18 @@ double ito_integral(double (*f)(double, double), double a, double b, unsigned lo
     return s;
 }
 
+double stratonovich_integral(double (*f)(double, double), double a, double b, unsigned long n) {
+    double dt = (b - a) / n;
+    double Bt = 0.0; // B0 = 0
+    double s = 0.0;
+    for(unsigned long i = 0; i < n; i++) {
+        double dB = sqrt(dt) * standard_normal(); 
+        s += f((i + 0.5) * dt, Bt) * dB;
+        Bt += dB;
+    }
+    return s;
+}
+
 // Calculates the variance of solution
 double solution_var(double(*sigma)(double), double t, unsigned long n)
 {
@@ -68,8 +80,32 @@ double stochastic_weierstrass(double a, double b)
     return weierstrass(b, a, b, 100);
 }
 
+double quadratic_variation(double *Y, int n) {
+    double qv = 0.0;
+    for (int i = 0; i < n-1; i++) {
+        double diff = Y[i + 1] - Y[i];
+        qv += diff * diff;
+    }
+    return qv;
+}
+
+double covariance(double* X, double *Y, int n) {
+    double cov = 0.0;
+    for (int i = 0; i < n-1; i++) {
+        double diff1 = Y[i + 1] - Y[i];
+        double diff2 = X[i + 1] - X[i];
+        cov += diff1 * diff2;
+    }
+    return cov;
+}
+
+double stochastic_exp(double* Y, int n) {
+    return exp(Y[n - 1] - 0.5 * quadratic_variation(Y, n));
+}
+
 int main()
 {
-    printf("Ito Integral of Weierstrass: %lf", ito_integral(stochastic_weierstrass, 2, 4, 100));
+    double Y[] = { 0.2, 1.1, 0.9, 2.4, 3.3 };
+    printf("Stochastic Exp: %lf", stochastic_exp(Y, 5));
     return 0;
 }
