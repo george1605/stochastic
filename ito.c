@@ -103,6 +103,19 @@ double stochastic_exp(double* Y, int n) {
     return exp(Y[n - 1] - 0.5 * quadratic_variation(Y, n));
 }
 
+// The Euler Maruyama SDE Solver
+// Does the X[i] = X[i - 1] + dX_t
+// Where dX_t = miu * dt + sigma * dBt
+void euler_maruyama(double* X, int n, double dt, double(*miu)(double, double), double(*sigma)(double, double)) {
+    double t = 0; // X[0] = initial condition, at t0 = 0
+    for(int i = 1;i < n;i++)
+    {
+        double dBt = sqrt(dt) * standard_normal();
+        X[i] = X[i-1] + miu(X[i-1], t) * dt + sigma(X[i-1], t) * dBt;
+        t += dt;
+    }
+}
+
 int main()
 {
     double Y[] = { 0.2, 1.1, 0.9, 2.4, 3.3 };
