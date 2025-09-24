@@ -116,6 +116,20 @@ void euler_maruyama(double* X, int n, double dt, double(*miu)(double, double), d
     }
 }
 
+double eps = 1e-6;
+
+void milstein(double* X, int n, double dt, double(*miu)(double, double), double(*sigma)(double, double)) {
+    double t = 0; // X[0] = initial condition, at t0 = 0
+    for(int i = 1;i < n;i++)
+    {
+        double dBt = sqrt(dt) * standard_normal();
+        double ds = (sigma(X[i-1] + eps, t) - sigma(X[i-1] - eps, t)) / (2.0 * eps);
+        X[i] = X[i-1] + miu(X[i-1], t) * dt + sigma(X[i-1], t) * dBt;
+        X[i] += 0.5 * sigma(X[i-1], t) * ds * (dBt * dBt - dt);
+        t += dt;
+    }
+}
+
 int main()
 {
     double Y[] = { 0.2, 1.1, 0.9, 2.4, 3.3 };
